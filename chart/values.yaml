@@ -14,6 +14,12 @@ postgres:
   imageTag: "11.5"
   imagePullPolicy: IfNotPresent
 
+strategy:
+  rollingUpdate:
+    maxSurge: 25%
+    maxUnavailable: 25%
+  type: RollingUpdate
+
 imagePullSecrets: []
 
 nodeSelector: {}

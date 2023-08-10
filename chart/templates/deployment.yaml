@@ -16,27 +16,17 @@ spec:
     matchLabels:
       app: {{ template "odyssey.fullname" . }}
   strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+{{ toYaml .Values.strategy | indent 4 }}
   template:
     metadata:
       labels:
         app: {{ template "odyssey.fullname" . }}
         release: {{ .Release.Name }}
     spec:
+      {{- if .Values.affinity }}
       affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                  - sc-postgres-prod-01
-                  - sc-postgres-prod-02
-                  - sc-postgres-prod-03
+{{ toYaml .Values.affinity | indent 8 }}
+      {{- end }}
       containers:
       - image: "{{ .Values.odyssey.image }}:{{ .Values.odyssey.imageTag }}"
         imagePullPolicy: {{ .Values.odyssey.imagePullPolicy | quote }}
