@@ -38,8 +38,8 @@ spec:
                   - sc-postgres-prod-02
                   - sc-postgres-prod-03
       containers:
-      - image: registry.sirius.online/cheops-edu/cheops-infra/odyssey:v1.2
-        imagePullPolicy: IfNotPresent
+      - image: "{{ .Values.odyssey.image }}:{{ .Values.odyssey.imageTag }}"
+        imagePullPolicy: {{ .Values.odyssey.imagePullPolicy | quote }}
         name: {{ template "odyssey.fullname" . }}
         resources:
           limits:
@@ -67,8 +67,8 @@ spec:
         - --log.level=error
         - --log.format=logfmt
         - --pgBouncer.connectionString=postgres://127.0.0.1:6432/console?sslmode=disable&connect_timeout=10
-        image: registry.sirius.online/cheops-edu/cheops-infra/pgbouncer-exporter:v0.6.0
-        imagePullPolicy: IfNotPresent
+        image: "{{ .Values.pgbouncer.image }}:{{ .Values.pgbouncer.imageTag }}"
+        imagePullPolicy: {{ .Values.pgbouncer.imagePullPolicy | quote }}
         name: exporter
         ports:
         - containerPort: 9127
@@ -85,8 +85,10 @@ spec:
         terminationMessagePolicy: File
       dnsConfig: {}
       dnsPolicy: ClusterFirst
+      {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
-      - name: gitlab-registry
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+      {{- end }}
       initContainers:
       - command:
         - sh
@@ -94,8 +96,8 @@ spec:
         - until pg_isready -h univ-postgres.postgres-prod.svc -p 5432 -U cheops_prod -d cheops; do echo
           waiting for database; sleep 2; done; sysctl -w net.core.somaxconn=2048 &&
           sysctl -w kernel.shm_rmid_forced=0 && sysctl -w kernel.msgmax=65536
-        image: registry.sirius.online/cheops-edu/cheops-infra/postgres:11.5
-        imagePullPolicy: IfNotPresent
+        image: "{{ .Values.postgres.image }}:{{ .Values.postgres.imageTag }}"
+        imagePullPolicy: {{ .Values.postgres.imagePullPolicy | quote }}
         name: wait-master
         resources: {}
         securityContext:
@@ -107,11 +109,10 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
+      {{- if .Values.tolerations }}
       tolerations:
-      - effect: NoSchedule
-        key: node-role
-        operator: Equal
-        value: postgres
+{{ toYaml .Values.tolerations | indent 8 }}
+      {{- end }}
       volumes:
       - configMap:
           defaultMode: 420

@@ -1,1 +1,23 @@
 #
+odyssey:
+  image: "registry.sirius.online/cheops-edu/cheops-infra/odyssey"
+  imageTag: "v1.2"
+  imagePullPolicy: IfNotPresent
+
+pgbouncer:
+  image: "registry.sirius.online/cheops-edu/cheops-infra/pgbouncer-exporter"
+  imageTag: "v0.6.0"
+  imagePullPolicy: IfNotPresent
+
+postgres:
+  image: "registry.sirius.online/cheops-edu/cheops-infra/postgres"
+  imageTag: "11.5"
+  imagePullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+nodeSelector: {}
+
+affinity: []
+
+tolerations: []
