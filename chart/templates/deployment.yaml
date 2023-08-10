@@ -2,17 +2,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    configmap.reloader.stakater.com/reload: odyssey
+    configmap.reloader.stakater.com/reload: {{ template "odyssey.fullname" . }}
   labels:
-    app: odyssey
-  name: odyssey
+    app: {{ template "odyssey.fullname" . }}
+    release: {{ .Release.Name }}
+  name: {{ template "odyssey.fullname" . }}
+  namespace: {{ .Release.Namespace }}
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
   revisionHistoryLimit: 5
   selector:
     matchLabels:
-      app: odyssey
+      app: {{ template "odyssey.fullname" . }}
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -21,7 +23,8 @@ spec:
   template:
     metadata:
       labels:
-        app: odyssey
+        app: {{ template "odyssey.fullname" . }}
+        release: {{ .Release.Name }}
     spec:
       affinity:
         nodeAffinity:
@@ -37,7 +40,7 @@ spec:
       containers:
       - image: registry.sirius.online/cheops-edu/cheops-infra/odyssey:v1.2
         imagePullPolicy: IfNotPresent
-        name: odyssey
+        name: {{ template "odyssey.fullname" . }}
         resources:
           limits:
             cpu: 800m

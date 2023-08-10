@@ -58,5 +58,7 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    app: odyssey
-  name: odyssey
+    app: {{ template "odyssey.fullname" . }}
+    release: {{ .Release.Name }}
+  name: {{ template "odyssey.fullname" . }}
+  namespace: {{ .Release.Namespace }}

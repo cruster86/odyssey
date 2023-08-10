@@ -2,8 +2,10 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   labels:
-    app: odyssey
-  name: odyssey-exporter
+    app: {{ template "odyssey.fullname" . }}
+    release: {{ .Release.Name }}
+  name: {{ template "odyssey.fullname" . }}-exporter
+  namespace: {{ .Release.Namespace }}
 spec:
   endpoints:
   - honorLabels: true
@@ -17,7 +19,7 @@ spec:
       - __name__
   namespaceSelector:
     matchNames:
-    - postgres-prod
+    - {{ .Release.Namespace }}
   selector:
     matchLabels:
-      app: odyssey-exporter
+      app: {{ template "odyssey.fullname" . }}-exporter
