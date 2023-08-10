@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: odyssey
+  name: odyssey-exporter
+spec:
+  endpoints:
+  - honorLabels: true
+    interval: 60s
+    path: /metrics
+    targetPort: 9127
+    metricRelabelings:
+    - action: keep
+      regex: (pgbouncer_databases_current_connections|pgbouncer_pools_client_maxwait_seconds|pgbouncer_stats_sql_transactions_pooled_total|pgbouncer_stats_queries_duration_seconds_total|pgbouncer_pools_server_idle_connections|pgbouncer_pools_server_active_connections|pgbouncer_pools_client_active_connections|pgbouncer_pools_client_waiting_connections)
+      sourceLabels:
+      - __name__
+  namespaceSelector:
+    matchNames:
+    - postgres-prod
+  selector:
+    matchLabels:
+      app: odyssey-exporter

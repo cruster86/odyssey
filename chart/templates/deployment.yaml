@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    configmap.reloader.stakater.com/reload: odyssey
+  labels:
+    app: odyssey
+  name: odyssey
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: odyssey
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: odyssey
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - sc-postgres-prod-01
+                  - sc-postgres-prod-02
+                  - sc-postgres-prod-03
+      containers:
+      - image: registry.sirius.online/cheops-edu/cheops-infra/odyssey:v1.2
+        imagePullPolicy: IfNotPresent
+        name: odyssey
+        resources:
+          limits:
+            cpu: 800m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+        stdin: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        tty: true
+        volumeMounts:
+        - mountPath: /etc/odyssey/odyssey.conf
+          name: odyssey
+          subPath: odyssey.conf
+      - args:
+        - --web.listen-address=:9127
+        - --web.telemetry-path=/metrics
+        - --log.level=error
+        - --log.format=logfmt
+        - --pgBouncer.connectionString=postgres://127.0.0.1:6432/console?sslmode=disable&connect_timeout=10
+        image: registry.sirius.online/cheops-edu/cheops-infra/pgbouncer-exporter:v0.6.0
+        imagePullPolicy: IfNotPresent
+        name: exporter
+        ports:
+        - containerPort: 9127
+          name: exporter
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 250m
+            memory: 150Mi
+          requests:
+            cpu: 30m
+            memory: 40Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: gitlab-registry
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - until pg_isready -h univ-postgres.postgres-prod.svc -p 5432 -U cheops_prod -d cheops; do echo
+          waiting for database; sleep 2; done; sysctl -w net.core.somaxconn=2048 &&
+          sysctl -w kernel.shm_rmid_forced=0 && sysctl -w kernel.msgmax=65536
+        image: registry.sirius.online/cheops-edu/cheops-infra/postgres:11.5
+        imagePullPolicy: IfNotPresent
+        name: wait-master
+        resources: {}
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: node-role
+        operator: Equal
+        value: postgres
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: odyssey
+        name: odyssey

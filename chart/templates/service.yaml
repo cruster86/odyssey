@@ -1,0 +1,33 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: odyssey
+spec:
+  clusterIP: None
+  ports:
+  - name: default
+    port: 6432
+    protocol: TCP
+    targetPort: 6432
+  selector:
+    app: odyssey
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: odyssey-exporter
+  name: odyssey-exporter
+spec:
+  ports:
+  - name: exporter
+    port: 9127
+    protocol: TCP
+    targetPort: 9127
+  selector:
+    app: odyssey
+  sessionAffinity: None
+  type: ClusterIP
