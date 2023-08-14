@@ -24,6 +24,6 @@ imagePullSecrets: []
 
 nodeSelector: {}
 
-affinity: []
+affinity: {}
 
 tolerations: []
