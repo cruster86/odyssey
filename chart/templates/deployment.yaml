@@ -85,7 +85,8 @@ spec:
       - command:
         - sh
         - -c
-        - until pg_isready -h univ-postgres.postgres-prod.svc -p 5432 -U cheops_prod -d cheops; do echo
+        - until pg_isready -h {{ .Values.postgres.host }} -p {{ .Values.postgres.port }} 
+          -U {{ .Values.postgres.username }} -d {{ .Values.postgres.database }}; do echo
           waiting for database; sleep 2; done; sysctl -w net.core.somaxconn=2048 &&
           sysctl -w kernel.shm_rmid_forced=0 && sysctl -w kernel.msgmax=65536
         image: "{{ .Values.postgres.image }}:{{ .Values.postgres.imageTag }}"
