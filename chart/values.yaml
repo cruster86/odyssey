@@ -12,6 +12,10 @@ postgres:
   image: "registry.sirius.online/cheops-edu/cheops-infra/postgres"
   imageTag: "11.5"
   imagePullPolicy: IfNotPresent
+  host: ""
+  port: 5432
+  username: ""
+  database: ""
 
 strategy:
   rollingUpdate:
