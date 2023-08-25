@@ -19,6 +19,8 @@ spec:
 {{ toYaml .Values.strategy | indent 4 }}
   template:
     metadata:
+      annotations:
+{{ toYaml .Values.annotations | indent 8 }}
       labels:
         app: {{ template "odyssey.fullname" . }}
         release: {{ .Release.Name }}
