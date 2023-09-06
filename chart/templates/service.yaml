@@ -23,7 +23,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: {{ template "odyssey.fullname" . }}
+    app: {{ template "odyssey.fullname" . }}-exporter
     release: {{ .Release.Name }}
   name: {{ template "odyssey.fullname" . }}-exporter
   namespace: {{ .Release.Namespace }}
